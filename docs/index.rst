@@ -92,14 +92,19 @@ For a full list of available options::
 
     ./manage.py help syncstatic
 
-Context Processor
-*****************
+Context Processors
+******************
 
-django-cumulus includes an optional context_processor for accessing the full CDN_URL of any container files from your templates.
+django-cumulus includes two optional context processors for accessing the URLs of CDN hosted files from your templates. The ``cdn_url`` context processor 
 
-This is useful when you're using Cloud Files to serve you static media such as css and javascript and don't have access to the ``ImageField`` or ``FileField``'s url() convenience method.
+Explicit CDN path variable
+--------------------------
 
-Add ``cumulus.context_processors.cdn_url`` to your list of context processors in your project's settings.py file::
+The ``cdn_url`` context processor adds the full URL to your CDN host to the context allowing you to access the full CDN_URL of any container files from your templates.
+
+This is useful when you're using Cloud Files to serve static media such as CSS and JavaScript and don't have access to the ``ImageField`` or ``FileField``'s url() convenience method.
+
+Add ``cumulus.context_processors.cdn_url`` to the list of context processors in your project's settings.py file::
 
 
     TEMPLATE_CONTEXT_PROCESSORS = (
@@ -111,6 +116,44 @@ Add ``cumulus.context_processors.cdn_url`` to your list of context processors in
 Now in your templates you can use {{ CDN_URL }} to output the full path to local media::
 
     <link rel="stylesheet" href="{{ CDN_URL }}css/style.css">
+
+STATIC_URL context variable
+---------------------------
+
+The ``static_cdn_url`` context processor is handy if you are using ``django.contrib.staticfiles`` or its predecessor ``django-staticfiles`` in conjunction with django-cumulus ``syncstatic``. It's also helpful if you primarily use a CDN for production static media files but don't want to access (or can't access) the CDN while developing.
+
+The context processor conditionally updates the STATIC_URL context variable used by staticfiles (``django.contrib.staticfiles`` or ``django-staticfiles``) with the full CDN path *or* the standard static media based on your project settings.
+
+Add ``cumulus.context_processors.cdn_url`` to the list of context processors in your project's settings.py file::
+
+
+    TEMPLATE_CONTEXT_PROCESSORS = (
+        ...
+        'cumulus.context_processors.static_cdn_url',
+        ...
+    )
+
+The context processor will default to providing full CDN URLs if ``settings.DEBUG`` is ``False``. If ``settings.DEBUG`` is ``True`` then the context processor will pass the STATIC_URL variable as provided by the staticmedia application without any modification.
+
+You can override this conditional functionality by explicitly toggling the ``USE_CDN_STATIC`` value in the CUMULUS settings dictionary::
+
+    CUMULUS = {
+        ...
+        'USE_CDN_STATIC': True,
+        ...
+    }
+
+You can reference static media over the CDN as you would normally::
+
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/style.css">
+
+Result with ``USE_CDN_STATIC`` set to ``True``::
+
+    <link rel="stylesheet" href="http://public.container.url.rackcdn.com/static_directory/css/style.css">
+
+Result with ``USE_CDN_STATIC`` set to ``False``::
+
+    <link rel="stylesheet" href="/static_url/css/style.css">
 
 Requirements
 ************
