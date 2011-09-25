@@ -24,7 +24,7 @@ def static_cdn_url(request):
 
     Defaults to the opposite of the project's DEBUG status.
     """
-    use_cdn = getattr(CUMULUS, 'USE_CDN_STATIC', not(settings.DEBUG))
+    use_cdn = CUMULUS.get('USE_CDN_STATIC', not(settings.DEBUG))
     if use_cdn:
         url = cdn_url(request)['CDN_URL']
     else:
