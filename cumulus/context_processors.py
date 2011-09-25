@@ -27,4 +27,4 @@ def static_cdn_url(request):
         url = cdn_url(request)['CDN_URL']
     else:
         url = settings.STATIC_URL
-    return {'STATIC_CDN_URL': url}
+    return {'STATIC_URL': url}
