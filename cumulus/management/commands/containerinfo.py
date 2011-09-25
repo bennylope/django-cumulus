@@ -3,6 +3,7 @@ import optparse
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
+from cumulus.settings import CUMULUS
 
 
 class Command(BaseCommand):
@@ -17,8 +18,8 @@ class Command(BaseCommand):
     )
 
     def handle(self, *args, **options):
-        USERNAME = getattr(settings, 'CUMULUS_USERNAME')
-        API_KEY = getattr(settings, 'CUMULUS_API_KEY')
+        USERNAME = CUMULUS['USERNAME']
+        API_KEY = CUMULUS['API_KEY']
 
         conn = cloudfiles.get_connection(USERNAME, API_KEY)
         if args:
