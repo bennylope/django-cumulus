@@ -9,7 +9,8 @@ def cdn_url(request):
     A context processor to expose the full cdn url in templates.
 
     """
-    cloudfiles_storage = CloudFilesStorage()
+    static_container = CUMULUS.get('STATIC_CONTAINER', None)
+    cloudfiles_storage = CloudFilesStorage(container=static_container)
     static_url = settings.STATIC_URL
     container_url = cloudfiles_storage._get_container_url()
     cdn_url = container_url + static_url
