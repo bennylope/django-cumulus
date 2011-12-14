@@ -8,13 +8,17 @@ def cdn_url(request):
     """
     A context processor to expose the full cdn url in templates.
 
+    If the container URL is known prior, then it can be added to a deployment
+    settings file. This avoids the need to make a call to Rackspace on every
+    request, which occassionally terminate in connection errors.
     """
-    static_container = CUMULUS.get('STATIC_CONTAINER', None)
-    cloudfiles_storage = CloudFilesStorage(container=static_container)
     static_url = settings.STATIC_URL
-    container_url = cloudfiles_storage._get_container_url()
+    container_url = getattr(settings, 'CUMULUS_STATIC_CONTAINER_URL', None)
+    if not container_url:
+        static_container = CUMULUS.get('STATIC_CONTAINER', None)
+        cloudfiles_storage = CloudFilesStorage(container=static_container)
+        container_url = cloudfiles_storage._get_container_url()
     cdn_url = container_url + static_url
-
     return {'CDN_URL': cdn_url}
 
 
