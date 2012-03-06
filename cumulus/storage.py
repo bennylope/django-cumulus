@@ -31,6 +31,8 @@ class CloudFilesStorage(Storage):
         self.username = username or CUMULUS['USERNAME']
         self.use_ssl = CUMULUS['USE_SSL']
 
+        if 'CONTAINER_URI' in CUMULUS:
+            self._container_public_uri = CUMULUS['CONTAINER_URI']
 
     def __getstate__(self):
         """
