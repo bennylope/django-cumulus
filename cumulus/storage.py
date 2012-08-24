@@ -31,6 +31,8 @@ class CloudFilesStorage(Storage):
         self.username = username or CUMULUS['USERNAME']
         self.use_ssl = CUMULUS['USE_SSL']
 
+        if 'CONTAINER_URI' in CUMULUS:
+            self._container_public_uri = CUMULUS['CONTAINER_URI']
 
     def __getstate__(self):
         """
@@ -286,7 +288,7 @@ class CloudFilesStorageFile(File):
 
     file = property(_get_file, _set_file)
 
-    def read(self, num_bytes=None):
+    def read(self, num_bytes=0):
         if self._pos == self._get_size():
             return ""
         if num_bytes and self._pos + num_bytes > self._get_size():
