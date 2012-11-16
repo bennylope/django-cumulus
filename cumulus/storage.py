@@ -7,6 +7,7 @@ from cloudfiles.errors import NoSuchObject, ResponseError
 
 from django.core.files import File
 from django.core.files.storage import Storage
+from django.core.cache import cache
 
 from .settings import CUMULUS
 
@@ -78,11 +79,20 @@ class CloudFilesStorage(Storage):
     container = property(_get_container, _set_container)
 
     def _get_container_url(self):
+        """
+        Returns the container URL, setting it if missing, using the cache to
+        avoid repeated API requests.
+        """
         if not hasattr(self, '_container_public_uri'):
-            if self.use_ssl:
-                self._container_public_uri = self.container.public_ssl_uri()
+            container_uri = cache.get('_container_public_uri')
+            if not container_uri:
+                if self.use_ssl:
+                    self._container_public_uri = self.container.public_ssl_uri()
+                else:
+                    self._container_public_uri = self.container.public_uri()
+                cache.set('_container_public_uri', self._container_public_uri)
             else:
-                self._container_public_uri = self.container.public_uri()
+                self._container_public_uri = container_uri
         if CUMULUS['CNAMES'] and self._container_public_uri in CUMULUS['CNAMES']:
             self._container_public_uri = CUMULUS['CNAMES'][self._container_public_uri]
         return self._container_public_uri
